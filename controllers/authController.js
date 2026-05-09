@@ -42,6 +42,13 @@ exports.register = async (req, res) => {
   } catch (error) {
     console.error('REGISTER ERROR:', error);
 
+    // 👇 IMPORTANTE
+    if (error.code === 'P2002') {
+      return res.status(400).json({
+        error: 'El email ya existe'
+      });
+    }
+
     res.status(500).json({
       error: 'Error en registro'
     });
@@ -82,9 +89,12 @@ exports.login = async (req, res) => {
       });
     }
 
+    // 👇 IMPORTANTE
+    const secret = process.env.JWT_SECRET || 'secret123';
+
     const token = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET || 'secret123',
+      secret,
       { expiresIn: '1d' }
     );
 
