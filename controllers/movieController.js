@@ -155,3 +155,20 @@ exports.deleteMovie = async (req, res) => {
     });
   }
 };
+// ==========================
+// TOGGLE FAVORITE
+// ==========================
+exports.toggleFavorite = async (req, res) => {
+  res.status(200).json({
+    message: 'Favorite updated'
+  });
+};
+
+// ==========================
+// SET RATING
+// ==========================
+exports.setRating = async (req, res) => {
+  res.status(200).json({
+    message: 'Rating updated'
+  });
+};
