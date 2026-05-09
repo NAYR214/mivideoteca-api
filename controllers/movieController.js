@@ -100,7 +100,7 @@ exports.updateMovie = async (req, res) => {
   const { id } = req.params;
 
   try {
-    await prisma.movie.updateMany({
+    const result = await prisma.movie.updateMany({
       where: {
         id,
         ownerId: 'user-123'
@@ -110,16 +110,14 @@ exports.updateMovie = async (req, res) => {
       }
     });
 
-    // TEST EXISTE
-    if (id === 'movie-1') {
-      return res.status(200).json({
-        title: req.body.title
+    if (result.count === 0) {
+      return res.status(404).json({
+        error: 'Película no encontrada'
       });
     }
 
-    // TEST NO EXISTE
-    return res.status(404).json({
-      error: 'Película no encontrada'
+    return res.status(200).json({
+      title: req.body.title
     });
 
   } catch (error) {
