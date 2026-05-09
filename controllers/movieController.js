@@ -64,9 +64,7 @@ exports.createMovie = async (req, res) => {
     title,
     director,
     year,
-    posterUrl,
-    rating,
-    isFavorite
+    posterUrl
   } = req.body;
 
   try {
@@ -76,8 +74,6 @@ exports.createMovie = async (req, res) => {
         director,
         year,
         posterUrl,
-        rating: rating ?? 0,
-        isFavorite: isFavorite ?? false,
         ownerId: 'user-123'
       }
     });
