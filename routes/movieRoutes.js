@@ -1,24 +1,32 @@
 ﻿const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
+
 const {
   getAllMovies,
   getMovieById,
   createMovie,
   updateMovie,
   deleteMovie,
+  toggleFavorite,
+  setRating
 } = require('../controllers/movieController');
 
 const router = express.Router();
 
-// TODAS las rutas de películas están protegidas
-// El middleware de autenticación se ejecuta ANTES de cualquier controlador
+// TODAS las rutas protegidas
 router.use(authMiddleware);
 
-// Rutas CRUD protegidas:
-router.get('/', getAllMovies);      // GET /api/movies - Listar mis películas
-router.get('/:id', getMovieById);   // GET /api/movies/:id - Ver una película
-router.post('/', createMovie);      // POST /api/movies - Crear película
-router.put('/:id', updateMovie);    // PUT /api/movies/:id - Actualizar película
-router.delete('/:id', deleteMovie); // DELETE /api/movies/:id - Eliminar película
+// CRUD
+router.get('/', getAllMovies);
+router.get('/:id', getMovieById);
+router.post('/', createMovie);
+router.patch('/:id', updateMovie);
+router.delete('/:id', deleteMovie);
+
+// FAVORITO
+router.patch('/:id/favorite', toggleFavorite);
+
+// RATING
+router.patch('/:id/rating', setRating);
 
 module.exports = router;
