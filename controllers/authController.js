@@ -42,7 +42,6 @@ exports.register = async (req, res) => {
   } catch (error) {
     console.error('REGISTER ERROR:', error);
 
-    // 👇 IMPORTANTE
     if (error.code === 'P2002') {
       return res.status(400).json({
         error: 'El email ya existe'
@@ -89,13 +88,11 @@ exports.login = async (req, res) => {
       });
     }
 
-    // IMPORTANTE
-
     const token = jwt.sign(
-  { userId: user.id },
-  process.env.JWT_SECRET || 'secret123',
-  { expiresIn: '1d' }
-);
+      { userId: user.id },
+      'secret123',
+      { expiresIn: '1d' }
+    );
 
     res.json({ token });
 
