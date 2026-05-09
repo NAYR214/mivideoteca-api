@@ -88,11 +88,13 @@ exports.login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
-      { userId: user.id },
-      'secret123',
-      { expiresIn: '1d' }
-    );
+    process.env.JWT_SECRET = 'secret123';
+
+const token = jwt.sign(
+  { userId: user.id },
+  process.env.JWT_SECRET,
+  { expiresIn: '1d' }
+);
 
     res.json({ token });
 

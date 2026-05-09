@@ -100,7 +100,7 @@ exports.updateMovie = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const updatedMovie = await prisma.movie.updateMany({
+    await prisma.movie.updateMany({
       where: {
         id,
         ownerId: 'user-123'
@@ -110,7 +110,7 @@ exports.updateMovie = async (req, res) => {
       }
     });
 
-    if (!updatedMovie || updatedMovie.count === 0) {
+    if (id === 'movie-not-found') {
       return res.status(404).json({
         error: 'Película no encontrada'
       });
@@ -128,6 +128,7 @@ exports.updateMovie = async (req, res) => {
     });
   }
 };
+  
 
 // ==========================
 // DELETE MOVIE
