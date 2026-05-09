@@ -6,6 +6,9 @@
 exports.getAllMovies = async (req, res) => {
   try {
     const movies = await prisma.movie.findMany({
+      where: {
+        ownerId: 'user-123'
+      },
       orderBy: {
         createdAt: 'desc'
       }
@@ -31,7 +34,8 @@ exports.getMovieById = async (req, res) => {
   try {
     const movie = await prisma.movie.findFirst({
       where: {
-        id
+        id,
+        ownerId: 'user-123'
       }
     });
 
@@ -155,6 +159,7 @@ exports.deleteMovie = async (req, res) => {
     });
   }
 };
+
 // ==========================
 // TOGGLE FAVORITE
 // ==========================

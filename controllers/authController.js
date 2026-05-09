@@ -89,14 +89,13 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 👇 IMPORTANTE
-    const secret = process.env.JWT_SECRET || 'secret123';
+    // IMPORTANTE
 
     const token = jwt.sign(
-      { userId: user.id },
-      secret,
-      { expiresIn: '1d' }
-    );
+  { userId: user.id },
+  process.env.JWT_SECRET || 'secret123',
+  { expiresIn: '1d' }
+);
 
     res.json({ token });
 
