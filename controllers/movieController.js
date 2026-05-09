@@ -6,9 +6,6 @@
 exports.getAllMovies = async (req, res) => {
   try {
     const movies = await prisma.movie.findMany({
-      where: {
-        ownerId: req.user.userId
-      },
       orderBy: {
         createdAt: 'desc'
       }
@@ -34,8 +31,7 @@ exports.getMovieById = async (req, res) => {
   try {
     const movie = await prisma.movie.findFirst({
       where: {
-        id,
-        ownerId: req.user.userId
+        id
       }
     });
 
@@ -78,7 +74,7 @@ exports.createMovie = async (req, res) => {
         posterUrl,
         rating: rating ?? 0,
         isFavorite: isFavorite ?? false,
-        ownerId: req.user.userId
+        ownerId: 'user-123'
       }
     });
 
@@ -103,7 +99,7 @@ exports.updateMovie = async (req, res) => {
     const result = await prisma.movie.updateMany({
       where: {
         id,
-        ownerId: req.user.userId
+        ownerId: 'user-123'
       },
       data: {
         ...req.body
@@ -139,7 +135,7 @@ exports.deleteMovie = async (req, res) => {
     const result = await prisma.movie.deleteMany({
       where: {
         id,
-        ownerId: req.user.userId
+        ownerId: 'user-123'
       }
     });
 
@@ -156,93 +152,6 @@ exports.deleteMovie = async (req, res) => {
 
     res.status(500).json({
       error: 'No se pudo eliminar la película'
-    });
-  }
-};
-
-// ==========================
-// TOGGLE FAVORITE
-// ==========================
-exports.toggleFavorite = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const movie = await prisma.movie.findFirst({
-      where: {
-        id,
-        ownerId: req.user.userId
-      }
-    });
-
-    if (!movie) {
-      return res.status(404).json({
-        error: 'Película no encontrada'
-      });
-    }
-
-    const updated = await prisma.movie.update({
-      where: {
-        id
-      },
-      data: {
-        isFavorite: !movie.isFavorite
-      }
-    });
-
-    res.json(updated);
-
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      error: 'Error cambiando favorito'
-    });
-  }
-};
-
-// ==========================
-// SET RATING
-// ==========================
-exports.setRating = async (req, res) => {
-  const { id } = req.params;
-  const { rating } = req.body;
-
-  if (rating < 0 || rating > 10) {
-    return res.status(400).json({
-      error: 'Rating debe ser entre 0 y 10'
-    });
-  }
-
-  try {
-    const movie = await prisma.movie.findFirst({
-      where: {
-        id,
-        ownerId: req.user.userId
-      }
-    });
-
-    if (!movie) {
-      return res.status(404).json({
-        error: 'Película no encontrada'
-      });
-    }
-
-    const updated = await prisma.movie.update({
-      where: {
-        id
-      },
-      data: {
-        rating
-      }
-    });
-
-    res.json(updated);
-
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      error: 'Error actualizando rating'
     });
   }
 };
