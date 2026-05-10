@@ -61,39 +61,17 @@ exports.getMovieById = async (req, res) => {
 // ==========================
 exports.createMovie = async (req, res) => {
   try {
+
+    console.log('REQ.USER:', req.user);
+    console.log('AUTH HEADER:', req.headers.authorization);
+    console.log('BODY:', req.body);
+
     const {
       title,
       director,
       year,
       posterUrl
     } = req.body;
-
-    // Validaciones básicas
-    if (!title || !director || !year) {
-      return res.status(400).json({
-        error: 'Título, director y año son obligatorios'
-      });
-    }
-
-    // Verificar usuario autenticado
-    if (!req.user || !req.user.userId) {
-      return res.status(401).json({
-        error: 'Usuario no autenticado'
-      });
-    }
-
-    // Verificar que el usuario existe
-    const userExists = await prisma.user.findUnique({
-      where: {
-        id: req.user.userId
-      }
-    });
-
-    if (!userExists) {
-      return res.status(401).json({
-        error: 'Usuario no existe'
-      });
-    }
 
     const movie = await prisma.movie.create({
       data: {
@@ -108,7 +86,8 @@ exports.createMovie = async (req, res) => {
     res.status(201).json(movie);
 
   } catch (error) {
-    console.error(error);
+
+    console.error('CREATE MOVIE ERROR:', error);
 
     res.status(400).json({
       error: 'Datos inválidos'
