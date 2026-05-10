@@ -1,120 +1,41 @@
-﻿const prisma = require('../lib/prisma');
+﻿const jwt = require('jsonwebtoken');
 
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-
-// ==========================
-// REGISTER
-// ==========================
-exports.register = async (req, res) => {
+module.exports = (req, res, next) => {
   try {
-    const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({
-        error: 'Email y contraseña son obligatorios'
+    const authHeader = req.headers.authorization;
+
+    console.log('AUTH HEADER:', authHeader);
+
+    if (!authHeader) {
+      return res.status(401).json({
+        error: 'No autorizado'
       });
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        email
-      }
-    });
+    const token = authHeader.split(' ')[1];
 
-    if (existingUser) {
-      return res.status(400).json({
-        error: 'El email ya existe'
-      });
-    }
+    console.log('TOKEN:', token);
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword
-      }
-    });
-
-    const token = jwt.sign(
-      {
-        userId: user.id
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: '1d'
-      }
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
     );
 
-    res.status(201).json({
-      token
-    });
+    console.log('DECODED:', decoded);
+
+    req.user = {
+      userId: decoded.userId
+    };
+
+    next();
 
   } catch (error) {
-    console.error('REGISTER ERROR:', error);
 
-    res.status(500).json({
-      error: 'Error en registro'
-    });
-  }
-};
+    console.error('AUTH ERROR:', error);
 
-// ==========================
-// LOGIN
-// ==========================
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({
-        error: 'Email y contraseña son obligatorios'
-      });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: {
-        email
-      }
-    });
-
-    if (!user) {
-      return res.status(401).json({
-        error: 'Credenciales inválidas'
-      });
-    }
-
-    const isValid = await bcrypt.compare(
-      password,
-      user.password
-    );
-
-    if (!isValid) {
-      return res.status(401).json({
-        error: 'Credenciales inválidas'
-      });
-    }
-
-    const token = jwt.sign(
-      {
-        userId: user.id
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: '1d'
-      }
-    );
-
-    res.json({
-      token
-    });
-
-  } catch (error) {
-    console.error('LOGIN ERROR:', error);
-
-    res.status(500).json({
-      error: 'Error en login'
+    res.status(401).json({
+      error: 'Token inválido'
     });
   }
 };
