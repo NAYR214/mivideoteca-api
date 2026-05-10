@@ -9,7 +9,6 @@ exports.register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Verificar si el usuario ya existe
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
@@ -25,10 +24,8 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear usuario
     const user = await prisma.user.create({
       data: {
         username,
@@ -60,7 +57,6 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Buscar usuario
     const user = await prisma.user.findUnique({
       where: {
         email
@@ -73,7 +69,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Comparar contraseña
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -82,7 +77,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Crear token
     const token = jwt.sign(
       {
         userId: user.id
