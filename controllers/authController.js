@@ -1,26 +1,22 @@
 ﻿const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
 
-const prisma = new PrismaClient();
+const prisma = require('../lib/prisma');
 
+// ==========================
 // REGISTER
+// ==========================
 exports.register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { email, password } = req.body;
 
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email },
-          { username }
-        ]
-      }
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
     });
 
     if (existingUser) {
       return res.status(400).json({
-        error: 'El usuario o email ya existe'
+        error: 'El usuario ya existe'
       });
     }
 
@@ -28,19 +24,13 @@ exports.register = async (req, res) => {
 
     const user = await prisma.user.create({
       data: {
-        username,
         email,
         password: hashedPassword
       }
     });
 
     res.status(201).json({
-      message: 'Usuario registrado correctamente',
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email
-      }
+      message: 'Usuario creado'
     });
 
   } catch (error) {
@@ -52,15 +42,15 @@ exports.register = async (req, res) => {
   }
 };
 
+// ==========================
 // LOGIN
+// ==========================
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await prisma.user.findUnique({
-      where: {
-        email
-      }
+      where: { email }
     });
 
     if (!user) {
@@ -69,9 +59,12 @@ exports.login = async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const validPassword = await bcrypt.compare(
+      password,
+      user.password
+    );
 
-    if (!isMatch) {
+    if (!validPassword) {
       return res.status(401).json({
         error: 'Credenciales inválidas'
       });
@@ -88,12 +81,7 @@ exports.login = async (req, res) => {
     );
 
     res.json({
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email
-      }
+      token
     });
 
   } catch (error) {
