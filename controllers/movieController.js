@@ -5,7 +5,6 @@
 // ==========================
 exports.getAllMovies = async (req, res) => {
   try {
-
     const movies = await prisma.movie.findMany({
       where: {
         ownerId: req.user.userId
@@ -18,11 +17,10 @@ exports.getAllMovies = async (req, res) => {
     res.json(movies);
 
   } catch (error) {
-
     console.error(error);
 
     res.status(500).json({
-      error: 'Error al obtener películas'
+      error: 'Error al obtener las películas'
     });
   }
 };
@@ -31,11 +29,9 @@ exports.getAllMovies = async (req, res) => {
 // GET MOVIE BY ID
 // ==========================
 exports.getMovieById = async (req, res) => {
-
   const { id } = req.params;
 
   try {
-
     const movie = await prisma.movie.findFirst({
       where: {
         id,
@@ -52,11 +48,10 @@ exports.getMovieById = async (req, res) => {
     res.json(movie);
 
   } catch (error) {
-
     console.error(error);
 
     res.status(500).json({
-      error: 'Error al obtener película'
+      error: 'Error al obtener la película'
     });
   }
 };
@@ -65,11 +60,7 @@ exports.getMovieById = async (req, res) => {
 // CREATE MOVIE
 // ==========================
 exports.createMovie = async (req, res) => {
-
   try {
-
-    console.log('REQ.USER:', req.user);
-
     const {
       title,
       director,
@@ -77,11 +68,38 @@ exports.createMovie = async (req, res) => {
       posterUrl
     } = req.body;
 
+    // Validaciones básicas
+    if (!title || !director || !year) {
+      return res.status(400).json({
+        error: 'Título, director y año son obligatorios'
+      });
+    }
+
+    // Verificar usuario autenticado
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        error: 'Usuario no autenticado'
+      });
+    }
+
+    // Verificar que el usuario existe
+    const userExists = await prisma.user.findUnique({
+      where: {
+        id: req.user.userId
+      }
+    });
+
+    if (!userExists) {
+      return res.status(401).json({
+        error: 'Usuario no existe'
+      });
+    }
+
     const movie = await prisma.movie.create({
       data: {
         title,
         director,
-        year,
+        year: Number(year),
         posterUrl,
         ownerId: req.user.userId
       }
@@ -90,8 +108,7 @@ exports.createMovie = async (req, res) => {
     res.status(201).json(movie);
 
   } catch (error) {
-
-    console.error('CREATE MOVIE ERROR:', error);
+    console.error(error);
 
     res.status(400).json({
       error: 'Datos inválidos'
@@ -103,35 +120,38 @@ exports.createMovie = async (req, res) => {
 // UPDATE MOVIE
 // ==========================
 exports.updateMovie = async (req, res) => {
-
   const { id } = req.params;
 
   try {
-
-    const result = await prisma.movie.updateMany({
+    const movie = await prisma.movie.findFirst({
       where: {
         id,
         ownerId: req.user.userId
-      },
-      data: req.body
+      }
     });
 
-    if (result.count === 0) {
+    if (!movie) {
       return res.status(404).json({
         error: 'Película no encontrada'
       });
     }
 
-    res.json({
-      message: 'Película actualizada'
+    const updatedMovie = await prisma.movie.update({
+      where: {
+        id
+      },
+      data: {
+        ...req.body
+      }
     });
 
-  } catch (error) {
+    res.json(updatedMovie);
 
+  } catch (error) {
     console.error(error);
 
     res.status(400).json({
-      error: 'Error al actualizar película'
+      error: 'No se pudo actualizar la película'
     });
   }
 };
@@ -140,32 +160,35 @@ exports.updateMovie = async (req, res) => {
 // DELETE MOVIE
 // ==========================
 exports.deleteMovie = async (req, res) => {
-
   const { id } = req.params;
 
   try {
-
-    const result = await prisma.movie.deleteMany({
+    const movie = await prisma.movie.findFirst({
       where: {
         id,
         ownerId: req.user.userId
       }
     });
 
-    if (result.count === 0) {
+    if (!movie) {
       return res.status(404).json({
         error: 'Película no encontrada'
       });
     }
 
+    await prisma.movie.delete({
+      where: {
+        id
+      }
+    });
+
     res.status(204).send();
 
   } catch (error) {
-
     console.error(error);
 
     res.status(500).json({
-      error: 'Error al eliminar película'
+      error: 'No se pudo eliminar la película'
     });
   }
 };
@@ -174,16 +197,79 @@ exports.deleteMovie = async (req, res) => {
 // TOGGLE FAVORITE
 // ==========================
 exports.toggleFavorite = async (req, res) => {
-  res.json({
-    message: 'Favorite actualizado'
-  });
+  const { id } = req.params;
+
+  try {
+    const movie = await prisma.movie.findFirst({
+      where: {
+        id,
+        ownerId: req.user.userId
+      }
+    });
+
+    if (!movie) {
+      return res.status(404).json({
+        error: 'Película no encontrada'
+      });
+    }
+
+    const updatedMovie = await prisma.movie.update({
+      where: {
+        id
+      },
+      data: {
+        isFavorite: !movie.isFavorite
+      }
+    });
+
+    res.json(updatedMovie);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      error: 'No se pudo actualizar favorito'
+    });
+  }
 };
 
 // ==========================
 // SET RATING
 // ==========================
 exports.setRating = async (req, res) => {
-  res.json({
-    message: 'Rating actualizado'
-  });
+  const { id } = req.params;
+  const { rating } = req.body;
+
+  try {
+    const movie = await prisma.movie.findFirst({
+      where: {
+        id,
+        ownerId: req.user.userId
+      }
+    });
+
+    if (!movie) {
+      return res.status(404).json({
+        error: 'Película no encontrada'
+      });
+    }
+
+    const updatedMovie = await prisma.movie.update({
+      where: {
+        id
+      },
+      data: {
+        rating: Number(rating)
+      }
+    });
+
+    res.json(updatedMovie);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      error: 'No se pudo actualizar rating'
+    });
+  }
 };

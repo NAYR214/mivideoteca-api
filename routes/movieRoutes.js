@@ -14,18 +14,18 @@ const {
   setRating
 } = require('../controllers/movieController');
 
-router.get('/', authMiddleware, getAllMovies);
+// PROTEGER TODAS LAS RUTAS
+router.use(authMiddleware);
 
-router.get('/:id', authMiddleware, getMovieById);
+// CRUD
+router.get('/', getAllMovies);
+router.get('/:id', getMovieById);
+router.post('/', createMovie);
+router.put('/:id', updateMovie);
+router.delete('/:id', deleteMovie);
 
-router.post('/', authMiddleware, createMovie);
-
-router.put('/:id', authMiddleware, updateMovie);
-
-router.delete('/:id', authMiddleware, deleteMovie);
-
-router.patch('/:id/favorite', authMiddleware, toggleFavorite);
-
-router.patch('/:id/rating', authMiddleware, setRating);
+// Extras
+router.patch('/:id/favorite', toggleFavorite);
+router.patch('/:id/rating', setRating);
 
 module.exports = router;
