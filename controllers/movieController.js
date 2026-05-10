@@ -63,7 +63,6 @@ exports.createMovie = async (req, res) => {
   try {
 
     console.log('REQ.USER:', req.user);
-    console.log('AUTH HEADER:', req.headers.authorization);
     console.log('BODY:', req.body);
 
     const {
@@ -73,19 +72,18 @@ exports.createMovie = async (req, res) => {
       posterUrl
     } = req.body;
 
-    // Validaciones básicas
     if (!title || !director || !year) {
       return res.status(400).json({
-        error: 'Faltan campos obligatorios'
+        error: 'Faltan datos'
       });
     }
 
     const movie = await prisma.movie.create({
       data: {
-        title: title.trim(),
-        director: director.trim(),
+        title,
+        director,
         year: Number(year),
-        posterUrl: posterUrl?.trim() || null,
+        posterUrl: posterUrl || null,
         ownerId: req.user.userId
       }
     });
