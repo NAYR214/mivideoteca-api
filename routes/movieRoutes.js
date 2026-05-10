@@ -2,6 +2,8 @@
 
 const router = express.Router();
 
+const authMiddleware = require('../middlewares/authMiddleware');
+
 const {
   getAllMovies,
   getMovieById,
@@ -11,6 +13,9 @@ const {
   toggleFavorite,
   setRating
 } = require('../controllers/movieController');
+
+// PROTEGER TODAS LAS RUTAS
+router.use(authMiddleware);
 
 // CRUD
 router.get('/', getAllMovies);
