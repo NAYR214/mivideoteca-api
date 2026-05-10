@@ -2,7 +2,7 @@
 
 const router = express.Router();
 
-const authMiddleware = require('../middlewares/authMiddleware');
+const auth = require('../middleware/auth');
 
 const {
   getAllMovies,
@@ -14,18 +14,29 @@ const {
   setRating
 } = require('../controllers/movieController');
 
-// PROTEGER TODAS LAS RUTAS
-router.use(authMiddleware);
+// Todas las rutas protegidas
+router.use(auth);
 
+// ==========================
 // CRUD
+// ==========================
+
 router.get('/', getAllMovies);
+
 router.get('/:id', getMovieById);
+
 router.post('/', createMovie);
+
 router.put('/:id', updateMovie);
+
 router.delete('/:id', deleteMovie);
 
-// Extras
+// ==========================
+// EXTRAS
+// ==========================
+
 router.patch('/:id/favorite', toggleFavorite);
+
 router.patch('/:id/rating', setRating);
 
 module.exports = router;
