@@ -8,32 +8,44 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
+// ==========================
+// MIDDLEWARES
+// ==========================
+
 app.use(express.json());
+
 app.use(cors({
   origin: [
-    "http://localhost:5173",
-    "https://mivideoteca-web.vercel.app"
+    'http://localhost:5173',
+    'https://mivideoteca-web.vercel.app'
   ],
   credentials: true
 }));
 
+// ==========================
+// ROUTES
+// ==========================
 
-// Rutas
 app.use('/api/auth', require('./routes/authRoutes'));
+
 app.use('/api/movies', require('./routes/movieRoutes'));
 
-// Ruta básica
+// ==========================
+// ROOT
+// ==========================
+
 app.get('/', (req, res) => {
-  res.send('API funcionando ');
+  res.send('API funcionando');
 });
 
-// SOLO iniciar servidor fuera de tests
+// ==========================
+// START SERVER
+// ==========================
+
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
   });
 }
 
-// Exportar app para tests
 module.exports = app;

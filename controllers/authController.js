@@ -17,7 +17,9 @@ exports.register = async (req, res) => {
     }
 
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: {
+        email
+      }
     });
 
     if (existingUser) {
@@ -28,25 +30,29 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword
       }
     });
 
+    const token = jwt.sign(
+      {
+        userId: user.id
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '1d'
+      }
+    );
+
     res.status(201).json({
-      message: 'Usuario creado correctamente'
+      token
     });
 
   } catch (error) {
     console.error('REGISTER ERROR:', error);
-
-    if (error.code === 'P2002') {
-      return res.status(400).json({
-        error: 'El email ya existe'
-      });
-    }
 
     res.status(500).json({
       error: 'Error en registro'
@@ -68,7 +74,9 @@ exports.login = async (req, res) => {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: {
+        email
+      }
     });
 
     if (!user) {
@@ -88,15 +96,19 @@ exports.login = async (req, res) => {
       });
     }
 
-    process.env.JWT_SECRET = 'secret123';
+    const token = jwt.sign(
+      {
+        userId: user.id
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '1d'
+      }
+    );
 
-const token = jwt.sign(
-  { userId: user.id },
-  process.env.JWT_SECRET,
-  { expiresIn: '1d' }
-);
-
-    res.json({ token });
+    res.json({
+      token
+    });
 
   } catch (error) {
     console.error('LOGIN ERROR:', error);

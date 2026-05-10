@@ -6,7 +6,7 @@ module.exports = (req, res, next) => {
 
     if (!authHeader) {
       return res.status(401).json({
-        error: 'No autorizado, no hay token'
+        error: 'No autorizado'
       });
     }
 
@@ -18,7 +18,10 @@ module.exports = (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
 
     req.user = {
       userId: decoded.userId

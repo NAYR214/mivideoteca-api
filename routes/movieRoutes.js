@@ -14,13 +14,10 @@ const {
   setRating
 } = require('../controllers/movieController');
 
-// Todas las rutas protegidas
+// Middleware auth
 router.use(auth);
 
-// ==========================
 // CRUD
-// ==========================
-
 router.get('/', getAllMovies);
 
 router.get('/:id', getMovieById);
@@ -31,10 +28,7 @@ router.put('/:id', updateMovie);
 
 router.delete('/:id', deleteMovie);
 
-// ==========================
-// EXTRAS
-// ==========================
-
+// Extras
 router.patch('/:id/favorite', toggleFavorite);
 
 router.patch('/:id/rating', setRating);
