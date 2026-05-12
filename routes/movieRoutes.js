@@ -24,8 +24,10 @@ router.post('/', createMovie);
 router.put('/:id', updateMovie);
 router.delete('/:id', deleteMovie);
 
-// Extras
+// FAVORITO ❤️
 router.patch('/:id/favorite', toggleFavorite);
+
+// RATING ⭐
 router.patch('/:id/rating', setRating);
 
 module.exports = router;
