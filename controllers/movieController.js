@@ -182,9 +182,11 @@ exports.deleteMovie = async (req, res) => {
 // TOGGLE FAVORITE
 // ==========================
 exports.toggleFavorite = async (req, res) => {
+
   const { id } = req.params;
 
   try {
+
     const movie = await prisma.movie.findFirst({
       where: {
         id,
@@ -193,6 +195,7 @@ exports.toggleFavorite = async (req, res) => {
     });
 
     if (!movie) {
+
       return res.status(404).json({
         error: 'Película no encontrada'
       });
@@ -210,9 +213,10 @@ exports.toggleFavorite = async (req, res) => {
     res.json(updatedMovie);
 
   } catch (error) {
+
     console.error(error);
 
-    res.status(400).json({
+    res.status(500).json({
       error: 'No se pudo actualizar favorito'
     });
   }
